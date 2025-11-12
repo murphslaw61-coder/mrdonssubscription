@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#8B4513">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mr Don's">
+    <title>Mr Don's Soda Fountain Society</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #FDB714 0%, #8B4513 100%);
+            min-height: 100vh;
+            padding: 10px;
+            padding-bottom: 30px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px 15px 0 0;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .install-prompt {
+            display: none;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .install-prompt.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .benefits {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 5px solid #8B4513;
+        }
+
+        .benefits h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+        }
+
+        .benefit-item::before {
+            content: "✓";
+            color: #8B4513;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .pricing {
+            background: #FFD700;
+            color: #333;
+            padding: 25px 15px;
+            text-align: center;
+        }
+
+        .pricing h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .plans-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .plan-card {
+            background: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .plan-card.selected {
+            border-color: #8B4513;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .plan-card:active {
+            transform: scale(0.98);
+        }
+
+        .plan-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #8B4513;
+        }
+
+        .price-detail {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .plan-features {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .plan-feature {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.9em;
+        }
+
+        .plan-feature::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #8B4513;
+            font-weight: bold;
+        }
+
+        .ultimate-badge {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-section {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #8B4513;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #FDB714 0%, #8B4513 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+            -webkit-appearance: none;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(253, 183, 20, 0.5);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .success-message, .error-message {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.85em;
+        }
+
+        .payment-section {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .payment-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        #card-element {
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .card-errors {
+            color: #e74c3c;
+            font-size: 0.85em;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.8em;
+            }
+
+            .price {
+                font-size: 2em;
+            }
+
+            .header {
+                padding: 25px 15px;
+            }
+
+            .form-section {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="install-prompt" id="installPrompt">
+            📱 Install this app on your phone for easy access!
+        </div>
+
+        <div class="header">
+            <div class="logo">🥤 Mr Don's</div>
+            <div class="tagline">Soda Fountain Society</div>
+        </div>
+
+        <div class="benefits">
+            <h2>Why Join?</h2>
+            <div class="benefit-item">Unlimited drinks for one full month</div>
+            <div class="benefit-item">Digital membership card on your phone</div>
+            <div class="benefit-item">Perfect for daily visitors</div>
+            <div class="benefit-item">Family-friendly since 1952</div>
+        </div>
+
+        <div class="pricing">
+            <h2>Choose Your Plan</h2>
+            <div class="plans-container">
+                <div class="plan-card" data-plan="basic" data-price="14.99">
+                    <div class="plan-name">Soda Fountain Society</div>
+                    <div class="price">$14.99</div>
+                    <div class="price-detail">per month</div>
+                    <div class="plan-features">
+                        <div class="plan-feature">Unlimited fountain sodas</div>
+                        <div class="plan-feature">Unlimited iced tea</div>
+                        <div class="plan-feature">Unlimited lemonade</div>
+                        <div class="plan-feature">Unlimited coffee</div>
+                    </div>
+                </div>
+                <div class="plan-card" data-plan="ultimate" data-price="19.99">
+                    <div class="ultimate-badge">MOST POPULAR</div>
+                    <div class="plan-name">Ultimate Soda Fountain Society</div>
+                    <div class="price">$19.99</div>
+                    <div class="price-detail">per month</div>
+                    <div class="plan-features">
+                        <div class="plan-feature">Unlimited fountain sodas</div>
+                        <div class="plan-feature">Unlimited iced tea</div>
+                        <div class="plan-feature">Unlimited lemonade</div>
+                        <div class="plan-feature">Unlimited coffee</div>
+                        <div class="plan-feature">Unlimited milkshakes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="success-message" id="successMessage">
+                Payment successful! Redirecting to your membership card...
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="subscriptionForm">
+                <h2 style="margin-bottom: 20px; color: #333; font-size: 1.3em;">Subscribe Now</h2>
+
+                <div class="form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" id="firstName" required autocomplete="given-name">
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" id="lastName" required autocomplete="family-name">
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address <span class="required">*</span></label>
+                    <input type="email" id="email" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="tel" id="phone" required autocomplete="tel">
+                </div>
+
+                <div class="payment-section">
+                    <h3>💳 Payment Information</h3>
+                    <div id="card-element"></div>
+                    <div class="card-errors" id="card-errors"></div>
+                </div>
+
+                <div class="note">
+                    <strong>Secure Payment:</strong> Your payment is processed securely through Stripe. Your membership card will be available immediately after payment.
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <div class="btn-content">
+                        <span id="btnText">Subscribe Now</span>
+                        <div class="loading-spinner" id="spinner"></div>
+                    </div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.classList.add('show');
+        });
+
+        installPrompt.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installPrompt.classList.remove('show');
+            }
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+
+        // Plan Selection
+        let selectedPlan = null;
+        let selectedPrice = null;
+
+        document.querySelectorAll('.plan-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPlan = this.dataset.plan;
+                selectedPrice = this.dataset.price;
+            });
+        });
+
+        // Stripe Integration
+        const stripe = Stripe('pk_live_51SQy82AkH95JnrZsStmcaHwG8jBudCsh2z2EGzWmipRG0oPj3nq2eByTzw48KE74M9uBTsBinHD0r1kJA8mzRwlY00pY0GRGxs');
+        const elements = stripe.elements();
+        
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#333',
+                    '::placeholder': {
+                        color: '#aab7c4',
+                    },
+                },
+                invalid: {
+                    color: '#e74c3c',
+                },
+            },
+        });
+        
+        cardElement.mount('#card-element');
+
+        cardElement.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // Form Submission
+        const form = document.getElementById('subscriptionForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = document.getElementById('spinner');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate plan selection
+            if (!selectedPlan) {
+                showError('Please select a subscription plan');
+                return;
+            }
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            btnText.textContent = 'Processing...';
+            spinner.style.display = 'block';
+
+            const formData = {
+                plan: selectedPlan,
+                price: selectedPrice,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+            };
+
+            try {
+                // Create payment intent on your server
+                const response = await fetch('/.netlify/functions/create-payment-intent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: Math.round(parseFloat(selectedPrice) * 100), // Convert to cents
+                        customerInfo: formData
+                    }),
+                });
+
+                const { clientSecret } = await response.json();
+
+                // Confirm payment with Stripe
+                const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            name: `${formData.firstName} ${formData.lastName}`,
+                            email: formData.email,
+                            phone: formData.phone,
+                        },
+                    },
+                });
+
+                if (error) {
+                    showError(error.message);
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Subscribe Now';
+                    spinner.style.display = 'none';
+                } else {
+                    // Payment successful
+                    const membershipData = {
+                        ...formData,
+                        membershipId: generateMembershipId(),
+                        startDate: new Date().toISOString(),
+                        expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                        paymentId: paymentIntent.id
+                    };
+
+                    // Save to localStorage
+                    localStorage.setItem('mrDonsMembership', JSON.stringify(membershipData));
+
+                    // Show success and redirect
+                    document.getElementById('successMessage').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'membership-card.html';
+                    }, 2000);
+                }
+            } catch (error) {
+                showError('Payment processing failed. Please try again.');
+                submitBtn.disabled = false;
+                btnText.textContent = 'Subscribe Now';
+                spinner.style.display = 'none';
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function generateMembershipId() {
+            return 'MD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        // For demo purposes without server - Remove in production
+        // This simulates payment success for testing
+        window.DEMO_MODE = false;  // Changed to false for LIVE MODE
+        
+        if (window.DEMO_MODE) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!selectedPlan) {
+                    showError('Please select a subscription plan');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                btnText.textContent = 'Processing...';
+                spinner.style.display = 'block';
+
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const membershipData = {
+                    plan: selectedPlan,
+                    price: selectedPrice,
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    membershipId: generateMembershipId(),
+                    startDate: new Date().toISOString(),
+                    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                };
+
+                localStorage.setItem('mrDonsMembership', JSON.stringify(membershipData));
+
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = 'membership-card.html';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
