@@ -358,6 +358,57 @@
                 padding: 20px 15px;
             }
         }
+        
+        /* --- NEW CSS FOR iOS MODAL --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+        
+        .modal-content h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+        
+        .modal-content p {
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-close {
+            width: 100%;
+            padding: 14px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            -webkit-appearance: none;
+        }
+        /* --- END OF NEW CSS --- */
     </style>
 </head>
 <body>
@@ -458,17 +509,50 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="iosInstallModal">
+        <div class="modal-content">
+            <h3>Install Mr Don's App</h3>
+            <p>To add this app to your Home Screen, tap the <strong>Share</strong> icon ( <span style="font-size: 1.5em; vertical-align: middle;">&#x2B06;</span> ) in your Safari menu.</p>
+            <p>Then, scroll down and select:</p>
+            <strong style="display: block; margin: 10px 0; font-size: 1.1em;">"Add to Home Screen"</strong>
+            <button class="modal-close" id="closeIosModal">Got it!</button>
+        </div>
+    </div>
     <script>
-        // PWA Installation
+        // --- NEW PWA INSTALLATION LOGIC (WITH iOS CHECK) ---
         let deferredPrompt;
         const installPrompt = document.getElementById('installPrompt');
+        const iosInstallModal = document.getElementById('iosInstallModal');
+        const closeIosModal = document.getElementById('closeIosModal');
+
+        // Helper function to detect iOS
+        function isIOS() {
+          return [
+            'iPad Simulator',
+            'iPhone Simulator',
+            'iPod Simulator',
+            'iPad',
+            'iPhone',
+            'iPod'
+          ].includes(navigator.platform)
+          // Also check new iPadOS
+          || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            installPrompt.classList.add('show');
+            
+            if (isIOS()) {
+                // iPhone/iPad user: Show the manual instructions
+                iosInstallModal.style.display = 'flex';
+            } else {
+                // Android/Desktop user: Show the automatic prompt
+                deferredPrompt = e;
+                installPrompt.classList.add('show');
+            }
         });
 
+        // Listener for the automatic (Android/Desktop) prompt
         installPrompt.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -477,6 +561,12 @@
                 installPrompt.classList.remove('show');
             }
         });
+        
+        // Listener for the new manual (iOS) prompt
+        closeIosModal.addEventListener('click', () => {
+            iosInstallModal.style.display = 'none';
+        });
+        // --- END OF NEW PWA LOGIC ---
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
@@ -600,7 +690,7 @@
                     // Save to localStorage
                     localStorage.setItem('mrDonsMembership', JSON.stringify(membershipData));
 
-                    // --- THIS IS THE NEW CODE YOU ADDED ---
+                    // --- THIS IS THE 'SAVE TO DATABASE' CODE ---
                     try {
                         // Save to the database in the background
                         fetch('/.netlify/functions/save-member', {
@@ -613,7 +703,7 @@
                         console.error('Failed to save member to DB:', saveError);
                         // Don't stop the user, they can lookup later
                     }
-                    // --- END OF NEW CODE ---
+                    // --- END OF 'SAVE TO DATABASE' CODE ---
 
                     // Show success and redirect
                     document.getElementById('successMessage').style.display = 'block';
