@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find My Membership - Mr Don's</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Shrikhand&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -23,13 +26,18 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             text-align: center;
         }
+        /* --- NEW LOGO STYLE --- */
         .logo-img {
-            max-width: 200px;
-            margin-bottom: 20px;
+            max-width: 150px;
+            margin-bottom: 10px;
         }
+        /* --- UPDATED TITLE STYLE --- */
         h2 {
-            color: #333;
+            font-family: 'Shrikhand', cursive;
+            font-size: 1.8em;
+            color: #8B4513;
             margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         input {
             width: 100%;
@@ -39,6 +47,7 @@
             font-size: 16px;
             margin-bottom: 20px;
             box-sizing: border-box;
+            -webkit-appearance: none;
         }
         button {
             width: 100%;
@@ -50,6 +59,7 @@
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
+            -webkit-appearance: none;
         }
         button:disabled {
             opacity: 0.6;
@@ -101,7 +111,6 @@
             successMsg.style.display = 'none';
 
             try {
-                // This calls the 'lookup-member.js' function you just created
                 const response = await fetch('/.netlify/functions/lookup-member', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -115,10 +124,10 @@
 
                 const memberData = await response.json();
 
-                // Save the data from the database to this device's localStorage
+                // Save to localStorage (for this device)
                 localStorage.setItem('mrDonsMembership', JSON.stringify(memberData));
                 
-                // Show success and redirect to the card page
+                // Show success and redirect
                 successMsg.textContent = 'Membership found! Redirecting...';
                 successMsg.style.display = 'block';
                 
