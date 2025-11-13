@@ -14,10 +14,9 @@ async function createTable(client) {
 
 export default async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
-  // Use the _UNPOOLED_ URL for a quick, serverless function
   const client = new Client({
     connectionString: process.env.NETLIFY_DATABASE_URL_UNPOOLED, 
   });
@@ -35,23 +34,21 @@ export default async (event) => {
       ON CONFLICT (email) 
       DO UPDATE SET membership_data = $2;
     `;
-    // We store the whole object as a JSON string in a single column
     const values = [emailKey, JSON.stringify(membershipData)];
     
     await client.query(query, values);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Member saved successfully" })
-    };
+    return new Response(
+      JSON.stringify({ message: "Member saved successfully" }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
-    return { 
-      statusCode: 500, 
-      body: JSON.stringify({ error: "Failed to save member", details: error.message }) 
-    };
+    return new Response(
+      JSON.stringify({ error: "Failed to save member", details: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   } finally {
-    // Ensure the connection is always closed
     await client.end();
   }
 };
