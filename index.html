@@ -11,7 +11,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     
-    <!-- Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
     
     <style>
@@ -600,6 +599,21 @@
 
                     // Save to localStorage
                     localStorage.setItem('mrDonsMembership', JSON.stringify(membershipData));
+
+                    // --- THIS IS THE NEW CODE YOU ADDED ---
+                    try {
+                        // Save to the database in the background
+                        fetch('/.netlify/functions/save-member', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(membershipData)
+                        });
+                        // We don't wait for this, just fire and forget
+                    } catch (saveError) {
+                        console.error('Failed to save member to DB:', saveError);
+                        // Don't stop the user, they can lookup later
+                    }
+                    // --- END OF NEW CODE ---
 
                     // Show success and redirect
                     document.getElementById('successMessage').style.display = 'block';
