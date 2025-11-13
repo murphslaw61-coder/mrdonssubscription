@@ -14,6 +14,7 @@
     <script src="https://js.stripe.com/v3/"></script>
     
     <style>
+        /* --- YOUR CSS STYLES ARE UNCHANGED --- */
         * {
             margin: 0;
             padding: 0;
@@ -77,6 +78,57 @@
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+        
+        /* --- iOS Install Modal CSS --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+        
+        .modal-content h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+        
+        .modal-content p {
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-close {
+            width: 100%;
+            padding: 14px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            -webkit-appearance: none;
+        }
+        /* --- End iOS Install Modal CSS --- */
 
         .benefits {
             background: #f8f9fa;
@@ -358,57 +410,6 @@
                 padding: 20px 15px;
             }
         }
-        
-        /* --- NEW CSS FOR iOS MODAL --- */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 350px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            animation: slideDown 0.3s ease;
-        }
-        
-        .modal-content h3 {
-            color: #8B4513;
-            margin-bottom: 15px;
-        }
-        
-        .modal-content p {
-            line-height: 1.6;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .modal-close {
-            width: 100%;
-            padding: 14px;
-            background: #8B4513;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            -webkit-appearance: none;
-        }
-        /* --- END OF NEW CSS --- */
     </style>
 </head>
 <body>
@@ -416,7 +417,16 @@
         <div class="install-prompt" id="installPrompt">
             📱 Install this app on your phone for easy access!
         </div>
-
+        
+        <div class="modal-overlay" id="iosInstallModal">
+            <div class="modal-content">
+                <h3>Install Mr Don's App</h3>
+                <p>To add this app to your Home Screen, tap the <strong>Share</strong> icon ( <span style="font-size: 1.5em; vertical-align: middle;">&#x2B06;</span> ) in your Safari menu.</p>
+                <p>Then, scroll down and select:</p>
+                <strong style="display: block; margin: 10px 0; font-size: 1.1em;">"Add to Home Screen"</strong>
+                <button class="modal-close" id="closeIosModal">Got it!</button>
+            </div>
+        </div>
         <div class="header">
             <div class="logo">🥤 Mr Don's</div>
             <div class="tagline">Soda Fountain Society</div>
@@ -424,36 +434,30 @@
 
         <div class="benefits">
             <h2>Why Join?</h2>
-            <div class="benefit-item">Unlimited drinks for one full month</div>
+            <div class="benefit-item">Unlimited drinks, billed monthly</div>
             <div class="benefit-item">Digital membership card on your phone</div>
-            <div class="benefit-item">Perfect for daily visitors</div>
+            <div class="benefit-item">Cancel anytime via your customer portal</div>
             <div class="benefit-item">Family-friendly since 1952</div>
         </div>
 
         <div class="pricing">
             <h2>Choose Your Plan</h2>
             <div class="plans-container">
-                <div class="plan-card" data-plan="basic" data-price="14.99">
+                <div class="plan-card" data-plan="basic" data-price-id="price_1SSTn9AkH95JnrZsXAAD9L6H">
                     <div class="plan-name">Soda Fountain Society</div>
                     <div class="price">$14.99</div>
                     <div class="price-detail">per month</div>
                     <div class="plan-features">
-                        <div class="plan-feature">Unlimited fountain sodas</div>
-                        <div class="plan-feature">Unlimited iced tea</div>
-                        <div class="plan-feature">Unlimited lemonade</div>
-                        <div class="plan-feature">Unlimited coffee</div>
+                        <div class="plan-feature">Unlimited fountain sodas, tea, lemonade, coffee</div>
                     </div>
                 </div>
-                <div class="plan-card" data-plan="ultimate" data-price="19.99">
+                <div class="plan-card" data-plan="ultimate" data-price-id="price_1SSToJAkH95JnrZsMKNKwUif">
                     <div class="ultimate-badge">MOST POPULAR</div>
                     <div class="plan-name">Ultimate Soda Fountain Society</div>
                     <div class="price">$19.99</div>
                     <div class="price-detail">per month</div>
                     <div class="plan-features">
-                        <div class="plan-feature">Unlimited fountain sodas</div>
-                        <div class="plan-feature">Unlimited iced tea</div>
-                        <div class="plan-feature">Unlimited lemonade</div>
-                        <div class="plan-feature">Unlimited coffee</div>
+                        <div class="plan-feature">All basic plan drinks</div>
                         <div class="plan-feature">Unlimited milkshakes</div>
                     </div>
                 </div>
@@ -496,7 +500,7 @@
                 </div>
 
                 <div class="note">
-                    <strong>Secure Payment:</strong> Your payment is processed securely through Stripe. Your membership card will be available immediately after payment.
+                    <strong>Secure Recurring Payment:</strong> Your payment is processed securely through Stripe. Your membership will be available immediately and will auto-renew monthly.
                 </div>
 
                 <button type="submit" class="submit-btn" id="submitBtn">
@@ -509,17 +513,8 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="iosInstallModal">
-        <div class="modal-content">
-            <h3>Install Mr Don's App</h3>
-            <p>To add this app to your Home Screen, tap the <strong>Share</strong> icon ( <span style="font-size: 1.5em; vertical-align: middle;">&#x2B06;</span> ) in your Safari menu.</p>
-            <p>Then, scroll down and select:</p>
-            <strong style="display: block; margin: 10px 0; font-size: 1.1em;">"Add to Home Screen"</strong>
-            <button class="modal-close" id="closeIosModal">Got it!</button>
-        </div>
-    </div>
     <script>
-        // --- NEW PWA INSTALLATION LOGIC (WITH iOS CHECK) ---
+        // --- PWA INSTALLATION LOGIC (WITH iOS CHECK) ---
         let deferredPrompt;
         const installPrompt = document.getElementById('installPrompt');
         const iosInstallModal = document.getElementById('iosInstallModal');
@@ -535,7 +530,6 @@
             'iPhone',
             'iPod'
           ].includes(navigator.platform)
-          // Also check new iPadOS
           || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
         }
 
@@ -552,7 +546,6 @@
             }
         });
 
-        // Listener for the automatic (Android/Desktop) prompt
         installPrompt.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -562,29 +555,29 @@
             }
         });
         
-        // Listener for the new manual (iOS) prompt
         closeIosModal.addEventListener('click', () => {
             iosInstallModal.style.display = 'none';
         });
-        // --- END OF NEW PWA LOGIC ---
+        // --- END OF PWA LOGIC ---
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js');
         }
 
-        // Plan Selection
+        // --- MODIFIED PLAN SELECTION ---
         let selectedPlan = null;
-        let selectedPrice = null;
+        let selectedPriceId = null; // We now use Price ID, not price
 
         document.querySelectorAll('.plan-card').forEach(card => {
             card.addEventListener('click', function() {
                 document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedPlan = this.dataset.plan;
-                selectedPrice = this.dataset.price;
+                selectedPriceId = this.dataset.priceId; // Get the Price ID from the HTML
             });
         });
+        // --- END OF MODIFIED PLAN SELECTION ---
 
         // Stripe Integration
         const stripe = Stripe('pk_live_51SQy82AkH95JnrZsStmcaHwG8jBudCsh2z2EGzWmipRG0oPj3nq2eByTzw48KE74M9uBTsBinHD0r1kJA8mzRwlY00pY0GRGxs');
@@ -616,7 +609,7 @@
             }
         });
 
-        // Form Submission
+        // --- !! COMPLETELY REWRITTEN FORM SUBMISSION !! ---
         const form = document.getElementById('subscriptionForm');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
@@ -626,8 +619,14 @@
             e.preventDefault();
 
             // Validate plan selection
-            if (!selectedPlan) {
+            if (!selectedPriceId) {
                 showError('Please select a subscription plan');
+                return;
+            }
+            
+            // This is a check for your old IDs, in case they were different
+            if (selectedPriceId.includes('PASTE_YOUR')) {
+                showError('Site is not configured. Please contact support.');
                 return;
             }
 
@@ -638,7 +637,6 @@
 
             const formData = {
                 plan: selectedPlan,
-                price: selectedPrice,
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
                 email: document.getElementById('email').value,
@@ -646,21 +644,27 @@
             };
 
             try {
-                // Create payment intent on your server
-                const response = await fetch('/.netlify/functions/create-payment-intent', {
+                // 1. Call the NEW create-subscription function
+                const response = await fetch('/.netlify/functions/create-subscription', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        amount: Math.round(parseFloat(selectedPrice) * 100), // Convert to cents
-                        customerInfo: formData
+                        customerInfo: formData,
+                        priceId: selectedPriceId // Send the Price ID
                     }),
                 });
 
-                const { clientSecret } = await response.json();
+                const { clientSecret, subscriptionId } = await response.json();
 
-                // Confirm payment with Stripe
+                if (!clientSecret) {
+                    throw new Error('Failed to create subscription. Please try again.');
+                }
+
+                // 2. Confirm the card payment
+                // This is the same as before, but the clientSecret
+                // is for the subscription's first invoice.
                 const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
                         card: cardElement,
@@ -678,34 +682,32 @@
                     btnText.textContent = 'Subscribe Now';
                     spinner.style.display = 'none';
                 } else {
-                    // Payment successful
+                    // 3. Payment successful! Save member to our DB
                     const membershipData = {
                         ...formData,
-                        membershipId: generateMembershipId(),
+                        membershipId: generateMembershipId(), // Your internal ID
                         startDate: new Date().toISOString(),
+                        // Expiration is now just for your app, Stripe handles billing
                         expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                        paymentId: paymentIntent.id
+                        paymentId: paymentIntent.id,
+                        stripeSubscriptionId: subscriptionId // Store the Stripe ID
                     };
 
                     // Save to localStorage
                     localStorage.setItem('mrDonsMembership', JSON.stringify(membershipData));
 
-                    // --- THIS IS THE 'SAVE TO DATABASE' CODE ---
+                    // 4. Save to your Neon database
                     try {
-                        // Save to the database in the background
                         fetch('/.netlify/functions/save-member', {
                             method: 'POST',
                             headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify(membershipData)
                         });
-                        // We don't wait for this, just fire and forget
                     } catch (saveError) {
                         console.error('Failed to save member to DB:', saveError);
-                        // Don't stop the user, they can lookup later
                     }
-                    // --- END OF 'SAVE TO DATABASE' CODE ---
 
-                    // Show success and redirect
+                    // 5. Show success and redirect
                     document.getElementById('successMessage').style.display = 'block';
                     setTimeout(() => {
                         window.location.href = 'membership-card.html';
@@ -718,6 +720,7 @@
                 spinner.style.display = 'none';
             }
         });
+        // --- END OF REWRITTEN FORM SUBMISSION ---
 
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
@@ -732,46 +735,6 @@
             return 'MD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
 
-        // For demo purposes without server - Remove in production
-        // This simulates payment success for testing
-        window.DEMO_MODE = false;  // Changed to false for LIVE MODE
-        
-        if (window.DEMO_MODE) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                if (!selectedPlan) {
-                    showError('Please select a subscription plan');
-                    return;
-                }
-
-                submitBtn.disabled = true;
-                btnText.textContent = 'Processing...';
-                spinner.style.display = 'block';
-
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                const membershipData = {
-                    plan: selectedPlan,
-                    price: selectedPrice,
-                    firstName: document.getElementById('firstName').value,
-                    lastName: document.getElementById('lastName').value,
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value,
-                    membershipId: generateMembershipId(),
-                    startDate: new Date().toISOString(),
-                    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                };
-
-                localStorage.setItem('mrDonsMembership', JSON.stringify(membershipData));
-
-                document.getElementById('successMessage').style.display = 'block';
-                setTimeout(() => {
-                    window.location.href = 'membership-card.html';
-                }, 2000);
-            });
-        }
     </script>
 </body>
 </html>
