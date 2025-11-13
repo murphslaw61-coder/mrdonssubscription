@@ -1,8 +1,5 @@
 // File: netlify/functions/create-subscription.js
-import pg from 'pg';
-const { Client } = pg;
 import Stripe from 'stripe';
-
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async (event) => {
@@ -21,8 +18,6 @@ export default async (event) => {
     });
 
     // 2. Create the Subscription
-    // This creates the subscription in an "incomplete" state
-    // and prepares its first invoice for payment.
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: priceId }],
@@ -32,8 +27,6 @@ export default async (event) => {
     });
 
     // 3. Send the client_secret from the invoice's Payment Intent
-    // back to the frontend. The frontend will use this to
-    // confirm the card payment.
     return new Response(
       JSON.stringify({
         clientSecret: subscription.latest_invoice.payment_intent.client_secret,
