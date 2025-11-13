@@ -1,10 +1,9 @@
 // File: netlify/functions/lookup-member.js
-import pg from 'pg';
-const { Client } = pg;
+const { Client } = require('pg');
 
-export default async (event) => {
+exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return new Response("Method Not Allowed", { status: 405 });
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   const client = new Client({
@@ -14,10 +13,10 @@ export default async (event) => {
   try {
     const { email } = JSON.parse(event.body);
     if (!email) {
-      return new Response(
-        JSON.stringify({ error: "Email is required" }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return { 
+        statusCode: 400, 
+        body: JSON.stringify({ error: "Email is required" })
+      };
     }
 
     const emailKey = email.toLowerCase();
@@ -33,23 +32,23 @@ export default async (event) => {
     const result = await client.query(query, values);
 
     if (result.rows.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No membership found for this email" }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return { 
+        statusCode: 404, 
+        body: JSON.stringify({ error: "No membership found for this email" })
+      };
     }
 
-    // Return the membership data
-    return new Response(
-      JSON.stringify(result.rows[0].membership_data),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result.rows[0].membership_data) 
+    };
 
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: "Failed to lookup member", details: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return { 
+      statusCode: 500, 
+      body: JSON.stringify({ error: "Failed to lookup member", details: error.message }) 
+    };
   } finally {
     await client.end();
   }
