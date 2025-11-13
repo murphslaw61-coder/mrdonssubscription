@@ -4,7 +4,7 @@ const { Client } = pg;
 
 export default async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
   const client = new Client({
@@ -14,7 +14,10 @@ export default async (event) => {
   try {
     const { email } = JSON.parse(event.body);
     if (!email) {
-      return { statusCode: 400, body: JSON.stringify({ error: "Email is required" })};
+      return new Response(
+        JSON.stringify({ error: "Email is required" }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const emailKey = email.toLowerCase();
@@ -30,23 +33,23 @@ export default async (event) => {
     const result = await client.query(query, values);
 
     if (result.rows.length === 0) {
-      return { 
-        statusCode: 404, 
-        body: JSON.stringify({ error: "No membership found for this email" })
-      };
+      return new Response(
+        JSON.stringify({ error: "No membership found for this email" }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Return the JSON data stored in the database
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result.rows[0].membership_data) 
-    };
+    // Return the membership data
+    return new Response(
+      JSON.stringify(result.rows[0].membership_data),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
-    return { 
-      statusCode: 500, 
-      body: JSON.stringify({ error: "Failed to lookup member", details: error.message }) 
-    };
+    return new Response(
+      JSON.stringify({ error: "Failed to lookup member", details: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   } finally {
     await client.end();
   }
