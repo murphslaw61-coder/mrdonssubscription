@@ -17,6 +17,7 @@ export default async (event) => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
+  // Use the _UNPOOLED_ URL for a quick, serverless function
   const client = new Client({
     connectionString: process.env.NETLIFY_DATABASE_URL_UNPOOLED, 
   });
@@ -34,6 +35,7 @@ export default async (event) => {
       ON CONFLICT (email) 
       DO UPDATE SET membership_data = $2;
     `;
+    // We store the whole object as a JSON string in a single column
     const values = [emailKey, JSON.stringify(membershipData)];
     
     await client.query(query, values);
@@ -49,6 +51,7 @@ export default async (event) => {
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   } finally {
+    // Ensure the connection is always closed
     await client.end();
   }
 };
