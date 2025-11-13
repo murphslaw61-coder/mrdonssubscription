@@ -1,23 +1,24 @@
 // File: netlify/functions/create-subscription.js
-import Stripe from 'stripe';
+const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export default async (event) => {
+exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return new Response("Method Not Allowed", { status: 405 });
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed"
+    };
   }
 
   try {
     const { customerInfo, priceId } = JSON.parse(event.body);
 
-    // 1. Create a Stripe Customer
     const customer = await stripe.customers.create({
       email: customerInfo.email,
       name: `${customerInfo.firstName} ${customerInfo.lastName}`,
       phone: customerInfo.phone,
     });
 
-    // 2. Create the Subscription
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: priceId }],
@@ -26,19 +27,20 @@ export default async (event) => {
       expand: ['latest_invoice.payment_intent'],
     });
 
-    // 3. Send the client_secret from the invoice's Payment Intent
-    return new Response(
-      JSON.stringify({
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         clientSecret: subscription.latest_invoice.payment_intent.client_secret,
         subscriptionId: subscription.id
-      }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+      })
+    };
 
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: "Failed to create subscription", details: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: "Failed to create subscription", details: error.message })
+    };
   }
 };
