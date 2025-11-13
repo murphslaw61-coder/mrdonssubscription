@@ -458,7 +458,7 @@
             <p>You don't have an active membership yet. Subscribe to enjoy unlimited drinks at Mr Don's!</p>
             <button class="btn btn-primary" onclick="window.location.href='index.html'">Get Started</button>
         </div>
-        </div>
+    </div>
 
     <div class="brightness-max" id="brightnessMode">
         <button class="close-brightness" onclick="closeBrightQR()">×</button>
@@ -481,8 +481,12 @@
             const stored = localStorage.getItem('mrDonsMembership');
             
             if (!stored) {
-                document.getElementById('noMembership').style.display = 'block';
+                // --- THIS IS THE NEW LOGIC ---
+                // If no membership is found in this browser's storage,
+                // redirect to the lookup page to sign in.
+                window.location.href = 'lookup.html';
                 return;
+                // --- END NEW LOGIC ---
             }
 
             membershipData = JSON.parse(stored);
